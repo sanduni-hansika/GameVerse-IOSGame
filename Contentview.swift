@@ -65,10 +65,54 @@ struct ContentView: View {
         .ignoresSafeArea()
     }
 
+private var readyView: some View {
+        VStack(spacing: 22) {
+            Text("⚡️ Tap Frenzy")
+                .font(.system(size: 44, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
+ 
+            Text("Tap as many times as you can in \(Int(gameDuration)) seconds!")
+                .font(.headline)
+                .foregroundColor(.white.opacity(0.75))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+ 
+            VStack(alignment: .leading, spacing: 10) {
+                Label("Button shrinks as time runs out", systemImage: "arrow.down.right.and.arrow.up.left.circle.fill")
+                Label("Button jumps to a new spot every 2s", systemImage: "arrow.left.arrow.right.circle.fill")
+            }
+            .font(.subheadline.weight(.medium))
+            .foregroundColor(.white.opacity(0.65))
+            .padding(.top, 4)
+ 
+            if highScore > 0 {
+                Text("🏆 High Score: \(highScore)")
+                    .font(.title3.bold())
+                    .foregroundColor(.yellow)
+                    .padding(.top, 10)
+            }
+ 
+            Button(action: startGame) {
+                Text("Start Game")
+                    .font(.title2.bold())
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 44)
+                    .padding(.vertical, 16)
+                    .background(
+                        Capsule().fill(
+                            LinearGradient(colors: [.green, .mint],
+                                           startPoint: .leading, endPoint: .trailing)
+                        )
+                    )
+                    .shadow(color: .green.opacity(0.5), radius: 14, y: 6)
+            }
+            .padding(.top, 14)
+        }
+        .padding()
+    }
+ 
 
 
-
-    
 
     
 }
