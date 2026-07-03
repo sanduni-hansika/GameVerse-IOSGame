@@ -111,6 +111,57 @@ private var readyView: some View {
         .padding()
     }
  
+private func playingView(in geo: GeometryProxy) -> some View {
+        ZStack {
+            VStack {
+                hud
+                Spacer()
+            }
+ 
+            tapButton
+                .offset(buttonOffset)
+                .animation(.spring(response: 0.45, dampingFraction: 0.65), value: buttonOffset)
+                .animation(.easeInOut(duration: 0.25), value: buttonSize)
+                .position(x: geo.size.width / 2, y: geo.size.height / 2)
+ 
+            
+            ForEach(popups) { popup in
+                Text("+1")
+                    .font(.title.bold())
+                    .foregroundColor(.green)
+                    .shadow(color: .black.opacity(0.4), radius: 3)
+                    .position(x: popup.position.x, y: popup.position.y + popup.offsetY)
+                    .opacity(popup.opacity)
+            }
+        }
+        .onAppear { setupRound(in: geo) }
+        .onDisappear { stopTimers() }
+    }
+ 
+    private var hud: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("SCORE")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.5))
+                Text("\(score)")
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .foregroundColor(.white)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("TIME")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.5))
+                Text(String(format: "%.1f", max(timeRemaining, 0)))
+                    .font(.system(size: 34, weight: .heavy, design: .rounded))
+                    .foregroundColor(timeRemaining <= 3 ? .red : .white)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 20)
+    }
+
 
 
 
