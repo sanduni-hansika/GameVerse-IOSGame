@@ -227,7 +227,38 @@ private var gameOverView: some View {
         .padding()
     }
 
+private func startGame() {
+        score = 0
+        timeRemaining = gameDuration
+        buttonSize = buttonBaseSize
+        buttonOffset = .zero
+        popups.removeAll()
+        isNewHighScore = false
+        gameState = .playing
+    }
+ 
+    private func setupRound(in geo: GeometryProxy) {
+        stopTimers()
 
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            timeRemaining -= 0.1
+            buttonSize = sizeForTimeRemaining()
+ 
+            if timeRemaining <= 0 {
+                timeRemaining = 0
+                endGame()
+            }
+        }
+
+        moveTimer = Timer.scheduledTimer(withTimeInterval: moveInterval, repeats: true) { _ in
+            randomizeButtonPosition(in: geo)
+        }
+    }
+ 
+    private func sizeForTimeRemaining() -> CGFloat {
+        let ratio = max(timeRemaining / gameDuration, 0)
+        return buttonMinSize + (buttonBaseSize - buttonMinSize) * CGFloat(ratio)
+    }
 
 
     
