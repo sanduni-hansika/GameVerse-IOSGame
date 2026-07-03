@@ -162,6 +162,27 @@ private func playingView(in geo: GeometryProxy) -> some View {
         .padding(.top, 20)
     }
 
+private var tapButton: some View {
+        Button(action: handleTap) {
+            ZStack {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [Color.orange, Color.pink],
+                            center: .center, startRadius: 5, endRadius: buttonSize
+                        )
+                    )
+                    .frame(width: buttonSize, height: buttonSize)
+                    .shadow(color: .pink.opacity(0.6), radius: 16, y: 8)
+ 
+                Text("TAP")
+                    .font(.system(size: max(14, buttonSize * 0.18), weight: .heavy, design: .rounded))
+                    .foregroundColor(.white)
+            }
+            .scaleEffect(isPressed ? 0.88 : 1.0)
+        }
+        .buttonStyle(.plain)
+    }
 
 
 
