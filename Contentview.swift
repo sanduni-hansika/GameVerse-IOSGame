@@ -314,10 +314,23 @@ private func randomizeButtonPosition(in geo: GeometryProxy) {
         }
     }
 
+ private func endGame() {
+        stopTimers()
+        if score > highScore {
+            highScore = score
+            isNewHighScore = true
+            UserDefaults.standard.set(highScore, forKey: "TapFrenzyHighScore")
+        }
+        gameState = .gameOver
+    }
+ 
+    private func stopTimers() {
+        countdownTimer?.invalidate()
+        countdownTimer = nil
+        moveTimer?.invalidate()
+        moveTimer = nil
+    }
 
-
-
-    
 }
 
 #Preview {
