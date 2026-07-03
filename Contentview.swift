@@ -260,6 +260,30 @@ private func startGame() {
         return buttonMinSize + (buttonBaseSize - buttonMinSize) * CGFloat(ratio)
     }
 
+private func randomizeButtonPosition(in geo: GeometryProxy) {
+        let halfSize = buttonSize / 2
+        let topInset: CGFloat = 140    
+        let bottomInset: CGFloat = 60
+        let sideInset: CGFloat = 20
+ 
+        let minX = sideInset + halfSize
+        let maxX = geo.size.width - sideInset - halfSize
+        let minY = topInset + halfSize
+        let maxY = geo.size.height - bottomInset - halfSize
+ 
+        guard maxX > minX, maxY > minY else { return }
+ 
+        let newX = CGFloat.random(in: minX...maxX)
+        let newY = CGFloat.random(in: minY...maxY)
+ 
+        let centerX = geo.size.width / 2
+        let centerY = geo.size.height / 2
+ 
+        buttonOffset = CGSize(width: newX - centerX, height: newY - centerY)
+    }
+
+
+
 
     
 }
