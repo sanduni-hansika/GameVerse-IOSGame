@@ -184,6 +184,50 @@ private var tapButton: some View {
         .buttonStyle(.plain)
     }
 
+private var gameOverView: some View {
+        VStack(spacing: 18) {
+            Text("⏱ Time's Up!")
+                .font(.system(size: 36, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
+ 
+            Text("\(score)")
+                .font(.system(size: 72, weight: .black, design: .rounded))
+                .foregroundColor(.green)
+ 
+            Text("Final Score")
+                .font(.headline)
+                .foregroundColor(.white.opacity(0.6))
+ 
+            if isNewHighScore {
+                Text("🎉 New High Score!")
+                    .font(.title3.bold())
+                    .foregroundColor(.yellow)
+            } else {
+                Text("🏆 High Score: \(highScore)")
+                    .font(.title3.bold())
+                    .foregroundColor(.white.opacity(0.7))
+            }
+ 
+            Button(action: startGame) {
+                Text("Play Again")
+                    .font(.title2.bold())
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 44)
+                    .padding(.vertical, 16)
+                    .background(
+                        Capsule().fill(
+                            LinearGradient(colors: [.green, .mint],
+                                           startPoint: .leading, endPoint: .trailing)
+                        )
+                    )
+                    .shadow(color: .green.opacity(0.5), radius: 14, y: 6)
+            }
+            .padding(.top, 12)
+        }
+        .padding()
+    }
+
+
 
 
     
