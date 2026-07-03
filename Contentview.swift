@@ -282,6 +282,38 @@ private func randomizeButtonPosition(in geo: GeometryProxy) {
         buttonOffset = CGSize(width: newX - centerX, height: newY - centerY)
     }
 
+ private func handleTap() {
+        guard gameState == .playing else { return }
+        score += 1
+ 
+        isPressed = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            isPressed = false
+        }
+ 
+        spawnScorePopup()
+    }
+ 
+    private func spawnScorePopup() {
+        let screenSize = UIScreen.main.bounds.size
+        let centerX = screenSize.width / 2 + buttonOffset.width
+        let centerY = screenSize.height / 2 + buttonOffset.height - (buttonSize / 2) - 20
+ 
+        let popup = ScorePopup(position: CGPoint(x: centerX, y: centerY))
+        popups.append(popup)
+ 
+        withAnimation(.easeOut(duration: 0.6)) {
+            if let index = popups.firstIndex(where: { $0.id == popup.id }) {
+                popups[index].offsetY = -50
+                popups[index].opacity = 0
+            }
+        }
+ 
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            popups.removeAll { $0.id == popup.id }
+        }
+    }
+
 
 
 
