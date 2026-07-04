@@ -289,7 +289,42 @@ private var gameOverView: some View {
         }
     }
 
+ /// (Re)builds the grid for the current level, all cards starting dim.
+    private func resetCardsForCurrentLevel() {
+        cards = (0..<level.cardCount).map { Card(id: $0, isLit: false) }
+    }
 
+    /// Restarts the lighting timer at the current level's interval.
+    private func startLightTimer() {
+        lightTimer?.invalidate()
+        lightTimer = Timer.scheduledTimer(withTimeInterval: level.litWindow, repeats: true) { _ in
+            tick()
+        }
+    }
+
+    /// Fires every `level.litWindow` seconds: penalizes missed cards,
+    /// then lights a fresh random set.
+    private func tick() {
+        guard gameState == .playing else { return }
+
+        let missedCount = cards.filter { $0.isLit }.count
+        for _ in 0..<missedCount {
+            applyPenalty()
+        }
+
+        for i in cards.indices {
+            cards[i].isLit = false
+        }
+
+        let count = min(level.simultaneousLit, cards.count)
+        let indicesToLight = Array(cards.indices.shuffled().prefix(count))
+
+        withAnimation(.easeInOut(duration: 0.2)) {
+            for i in indicesToLight {
+                cards[i].isLit = true
+            }
+        }
+    }
 
 
 }
