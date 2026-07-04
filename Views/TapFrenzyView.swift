@@ -24,7 +24,7 @@ struct ContentView: View {
     @State private var gameState: GameState = .ready
     @State private var score: Int = 0
     @State private var timeRemaining: Double = 10.0
-    @State private var highScore: Int = UserDefaults.standard.integer(forKey: "TapFrenzyHighScore")
+    @AppStorage("TapFrenzyHighScore") private var highScore: Int = 0
     @State private var isNewHighScore: Bool = false
 
     @State private var buttonOffset: CGSize = .zero
