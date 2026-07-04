@@ -197,6 +197,66 @@ private var readyView: some View {
         .padding(.bottom, 24)
     }
 
+private var gameOverView: some View {
+        VStack(spacing: 18) {
+            Text("⏱ Round Over!")
+                .font(.system(size: 34, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
+
+            Text("\(score)")
+                .font(.system(size: 68, weight: .black, design: .rounded))
+                .foregroundColor(.blue)
+
+            Text("Final Score")
+                .font(.headline)
+                .foregroundColor(.white.opacity(0.6))
+
+            Text("Reached \(level.label)")
+                .font(.subheadline.bold())
+                .foregroundColor(level.glowColor)
+
+            if isNewHighScore {
+                Text("🎉 New High Score!")
+                    .font(.title3.bold())
+                    .foregroundColor(.yellow)
+            } else {
+                Text("🏆 High Score: \(highScore)")
+                    .font(.title3.bold())
+                    .foregroundColor(.white.opacity(0.7))
+            }
+
+            HStack(spacing: 14) {
+                Button(action: { dismiss() }) {
+                    Text("Home")
+                        .font(.headline.bold())
+                        .foregroundColor(.white)
+                        .padding(.horizontal, 28)
+                        .padding(.vertical, 14)
+                        .background(
+                            Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1.5)
+                        )
+                }
+
+                Button(action: startGame) {
+                    Text("Play Again")
+                        .font(.headline.bold())
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 28)
+                        .padding(.vertical, 14)
+                        .background(
+                            Capsule().fill(
+                                LinearGradient(colors: [.blue, .purple],
+                                               startPoint: .leading, endPoint: .trailing)
+                            )
+                        )
+                        .shadow(color: .blue.opacity(0.5), radius: 14, y: 6)
+                }
+            }
+            .padding(.top, 12)
+        }
+        .padding()
+    }
+
 
 
 
