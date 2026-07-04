@@ -257,7 +257,37 @@ private var gameOverView: some View {
         .padding()
     }
 
+ private func startGame() {
+        score = 0
+        timeRemaining = roundDuration
+        level = .l1
+        isNewHighScore = false
+        resetCardsForCurrentLevel()
+        gameState = .playing
+    }
 
+    private func setupRound() {
+        stopTimers()
+        startLightTimer()
+
+        countdownTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            timeRemaining -= 0.1
+            let elapsed = roundDuration - timeRemaining
+            let newLevel = GameLevel.level(forElapsed: elapsed)
+
+            if newLevel != level {
+                level = newLevel
+                resetCardsForCurrentLevel()
+                startLightTimer()
+                triggerLevelUpFlash()
+            }
+
+            if timeRemaining <= 0 {
+                timeRemaining = 0
+                endGame()
+            }
+        }
+    }
 
 
 
