@@ -42,7 +42,45 @@ struct LightItUpView: View {
         .onDisappear { stopTimers() }
     }
 
-   
+   private var backgroundGradient: some View {
+        LinearGradient(
+            colors: [Color(red: 0.04, green: 0.05, blue: 0.14),
+                     Color(red: 0.08, green: 0.05, blue: 0.24)],
+            startPoint: .topLeading,
+            endPoint: .bottomTrailing
+        )
+        .ignoresSafeArea()
+    }
+
+    private var backButton: some View {
+        VStack {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.headline.bold())
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(Circle().fill(Color.white.opacity(0.12)))
+                }
+                .padding(.leading, 16)
+                .padding(.top, 12)
+                Spacer()
+            }
+            Spacer()
+        }
+    }
+
+    private var levelUpFlash: some View {
+        ZStack {
+            level.glowColor.opacity(0.22).ignoresSafeArea()
+            Text("LEVEL \(level.rawValue)")
+                .font(.system(size: 44, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
+                .shadow(color: level.glowColor, radius: 20)
+        }
+        .transition(.opacity)
+        .allowsHitTesting(false)
+    } 
 
 
 
@@ -50,7 +88,7 @@ struct LightItUpView: View {
 
 
 
-   
+
 }
 
 #Preview {
