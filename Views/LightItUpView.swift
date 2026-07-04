@@ -134,6 +134,68 @@ private var readyView: some View {
         .padding()
     }
 
+ private var playingView: some View {
+        VStack(spacing: 0) {
+            hud
+
+            Spacer()
+
+            LazyVGrid(
+                columns: Array(repeating: GridItem(.flexible(), spacing: 14), count: level.columns),
+                spacing: 14
+            ) {
+                ForEach(cards) { card in
+                    LightCardView(isLit: card.isLit, glowColor: level.glowColor) {
+                        handleTap(card)
+                    }
+                }
+            }
+            .padding(.horizontal, 28)
+            .animation(.easeInOut(duration: 0.25), value: level)
+
+            Spacer()
+            Spacer()
+        }
+        .onAppear { setupRound() }
+    }
+
+    private var hud: some View {
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("SCORE")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.5))
+                Text("\(score)")
+                    .font(.system(size: 30, weight: .heavy, design: .rounded))
+                    .foregroundColor(.white)
+            }
+
+            Spacer()
+
+            VStack(spacing: 2) {
+                Text("LEVEL")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.5))
+                Text(level.label)
+                    .font(.system(size: 22, weight: .heavy, design: .rounded))
+                    .foregroundColor(level.glowColor)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("TIME")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.5))
+                Text(String(format: "%.0f", max(timeRemaining, 0)))
+                    .font(.system(size: 30, weight: .heavy, design: .rounded))
+                    .foregroundColor(timeRemaining <= 8 ? .red : .white)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 60)
+        .padding(.bottom, 24)
+    }
 
 
 
