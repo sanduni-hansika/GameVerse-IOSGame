@@ -351,9 +351,21 @@ private func handleTap(_ card: Card) {
         }
     }
 
+private func endGame() {
+        stopTimers()
+        if score > highScore {
+            highScore = score
+            isNewHighScore = true
+        }
+        gameState = .gameOver
+    }
 
-
-
+    private func stopTimers() {
+        countdownTimer?.invalidate()
+        countdownTimer = nil
+        lightTimer?.invalidate()
+        lightTimer = nil
+    }
 
 
 }
