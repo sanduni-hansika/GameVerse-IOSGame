@@ -326,6 +326,35 @@ private var gameOverView: some View {
         }
     }
 
+private func handleTap(_ card: Card) {
+        guard gameState == .playing else { return }
+        guard let index = cards.firstIndex(where: { $0.id == card.id }) else { return }
+
+        if cards[index].isLit {
+            score += 1
+            withAnimation(.easeOut(duration: 0.15)) {
+                cards[index].isLit = false
+            }
+        } else {
+            applyPenalty()
+        }
+    }
+
+    private func applyPenalty() {
+        score = max(0, score - 1)
+    }
+
+    private func triggerLevelUpFlash() {
+        withAnimation(.easeIn(duration: 0.15)) { showLevelUpFlash = true }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            withAnimation(.easeOut(duration: 0.3)) { showLevelUpFlash = false }
+        }
+    }
+
+
+
+
+
 
 }
 
