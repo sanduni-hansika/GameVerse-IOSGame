@@ -82,7 +82,57 @@ struct LightItUpView: View {
         .allowsHitTesting(false)
     } 
 
+private var readyView: some View {
+        VStack(spacing: 22) {
+            Text("💡 Light It Up")
+                .font(.system(size: 40, weight: .heavy, design: .rounded))
+                .foregroundColor(.white)
 
+            Text("A card lights up — tap it before it goes dark.\nThe grid grows and the window shrinks as you go.")
+                .font(.headline)
+                .foregroundColor(.white.opacity(0.75))
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 36)
+
+            HStack(spacing: 10) {
+                ForEach(GameLevel.allCases, id: \.self) { lvl in
+                    VStack(spacing: 4) {
+                        Circle()
+                            .fill(lvl.glowColor)
+                            .frame(width: 12, height: 12)
+                        Text(lvl.label)
+                            .font(.caption2.bold())
+                            .foregroundColor(.white.opacity(0.6))
+                    }
+                }
+            }
+            .padding(.top, 4)
+
+            if highScore > 0 {
+                Text("🏆 High Score: \(highScore)")
+                    .font(.title3.bold())
+                    .foregroundColor(.yellow)
+                    .padding(.top, 6)
+            }
+
+            Button(action: startGame) {
+                Text("Start Game")
+                    .font(.title2.bold())
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 44)
+                    .padding(.vertical, 16)
+                    .background(
+                        Capsule().fill(
+                            LinearGradient(colors: [.blue, .purple],
+                                           startPoint: .leading, endPoint: .trailing)
+                        )
+                    )
+                    .shadow(color: .blue.opacity(0.5), radius: 14, y: 6)
+            }
+            .padding(.top, 10)
+        }
+        .padding()
+    }
 
 
 
