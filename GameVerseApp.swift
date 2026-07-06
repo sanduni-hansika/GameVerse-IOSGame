@@ -4,7 +4,7 @@ import SwiftUI
 struct GameVerseApp: App {
     var body: some Scene {
         WindowGroup {
-            HomeView()
+           RootTabView()
         }
     }
 }
