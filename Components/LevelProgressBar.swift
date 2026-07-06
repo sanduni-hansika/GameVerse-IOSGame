@@ -2,21 +2,21 @@ import SwiftUI
 
 struct LevelProgressBar: View {
     let total: Int
-    let currentIndex: Int
+    let completed: Int
     let colors: [Color]
 
     var body: some View {
-        HStack(spacing: 5) {
-            ForEach(0..<max(total, 1), id: \.self) { i in
-                RoundedRectangle(cornerRadius: 3)
+        HStack(spacing: 4) {
+            ForEach(0..<total, id: \.self) { index in
+                Capsule()
                     .fill(
-                        i <= currentIndex
+                         index < completed
                             ? AnyShapeStyle(LinearGradient(colors: colors, startPoint: .leading, endPoint: .trailing))
                             : AnyShapeStyle(Color.white.opacity(0.12))
                     )
-                    .frame(height: 6)
+                    .frame(height: 5)
             }
         }
-        .animation(.easeInOut(duration: 0.3), value: currentIndex)
+        .animation(.easeInOut(duration: 0.25), value: completed)
     }
 }
