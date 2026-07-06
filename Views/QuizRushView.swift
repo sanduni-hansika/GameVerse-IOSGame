@@ -377,3 +377,115 @@ struct QuizRushView: View {
             .font(.subheadline.bold())
         }
     }
+
+    private func startGame() {
+        lastEntryID = nil
+        gameState = .playing
+    }
+
+    private func style(for option: String) -> AnswerOptionButton.Style {
+        guard viewModel.isAnswerLocked, let question = viewModel.currentQuestion else {
+            return .neutral
+        }
+        let correct = question.correctAnswer.htmlDecoded
+        if option == correct {
+            return .correct
+        } else if option == viewModel.selectedAnswer {
+            return .wrong
+        } else {
+            return .dimmed
+        }
+    }
+
+    private func handleSelect(_ option: String) {
+        guard !viewModel.isAnswerLocked else { return }
+        viewModel.selectAnswer(option)
+        showPointsPopup()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.1) {
+            if viewModel.isLastQuestion {
+                finishRound()
+            } else {
+                viewModel.advance()
+            }
+        }
+    }
+
+    private func showPointsPopup() {
+        popupOffset = 0
+        popupOpacity = 1
+        popupVisible = true
+        withAnimation(.easeOut(duration: 0.9)) {
+            popupOffset = -36
+            popupOpacity = 0
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.9) {
+            popupVisible = false
+        }
+    }
+
+    private func finishRound() {
+        let name = trimmedName.isEmpty ? "Player" : trimmedName
+        let result = ScoreHistoryStore.record(viewModel.score, playerName: name, for: Self.historyKey)
+        scoreHistory = result.top5
+        lastEntryID = result.top5.contains(where: { $0.id == result.entryID }) ? result.entryID : nil
+        gameState = .gameOver
+    }
+}
+
+private struct AnswerOptionButton: View {
+    enum Style {
+        case neutral, correct, wrong, dimmed
+    }
+
+    let text: String
+    let style: Style
+    let isDisabled: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text(text)
+                .font(.subheadline.weight(.medium))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
+                .background(
+                    RoundedRectangle(cornerRadius: 14)
+                        .fill(fillColor)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 14)
+                                .stroke(borderColor, lineWidth: 1.5)
+                        )
+                )
+        }
+        .buttonStyle(.plain)
+        .disabled(isDisabled)
+        .opacity(style == .dimmed ? 0.45 : 1.0)
+        .animation(.easeInOut(duration: 0.2), value: style)
+    }
+
+    private var fillColor: Color {
+        switch style {
+        case .neutral: return Color.white.opacity(0.06)
+        case .correct: return Color.green.opacity(0.22)
+        case .wrong: return Color.red.opacity(0.22)
+        case .dimmed: return Color.white.opacity(0.04)
+        }
+    }
+
+    private var borderColor: Color {
+        switch style {
+        case .neutral: return Color.white.opacity(0.14)
+        case .correct: return Color.green
+        case .wrong: return Color.red
+        case .dimmed: return Color.white.opacity(0.08)
+        }
+    }
+}
+
+#Preview {
+    NavigationStack { QuizRushView() }
+}
