@@ -1,69 +1,43 @@
 import SwiftUI
 
-enum GameState {
-    case ready
-    case playing
-    case gameOver
-}
-
-struct ScorePopup: Identifiable {
-    let id = UUID()
-    var position: CGPoint
-    var label: String = "+1"
-    var color: Color = .green
-    var opacity: Double = 1.0
-    var offsetY: CGFloat = 0
-}
-
 struct TapFrenzyView: View {
 
 @Environment(\.dismiss) private var dismiss
-
-    private static let historyKey = "TapFrenzyHistory"
-    private let accentColors: [Color] = [.orange, .pink]
-
-    private let gameDuration: Double = 10.0
-    private let buttonBaseSize: CGFloat = 140
-    private let buttonMinSize: CGFloat = 60
-    private let moveInterval: Double = 2.0
-
-
-    @State private var gameState: GameRoundState = .nameEntry
-    @State private var playerName: String = ""
-    @State private var score: Int = 0
-    @State private var timeRemaining: Double = 10.0
-
-    @State private var scoreHistory: [PlayerScore] = ScoreHistoryStore.load(for: TapFrenzyView.historyKey)
-    @State private var lastEntryID: UUID? = nil
-
-    @State private var buttonOffset: CGSize = .zero
-    @State private var buttonSize: CGFloat = 140
-
-    @State private var popups: [ScorePopup] = []
-
-    @State private var countdownTimer: Timer? = nil
-    @State private var moveTimer: Timer? = nil
-
-    @State private var isPressed: Bool = false
-
-    private var trimmedName: String {
-        playerName.trimmingCharacters(in: .whitespaces)
-    }
+@StateObject private var vm = TapFrenzyVM()
 
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 backgroundGradient
 
-                switch gameState {
+                switch vm.roundState {
                 case .nameEntry:
-                      nameEntryView
+                     PlayerNameField(
+                 gameTitle: "⚡️ Tap Frenzy",
+                        subtitle: "Enter your name to start the clock.",
+                        accentColors: [.orange, .pink],
+                        systemImage: "bolt.fill"
+                    ) { name in vm.confirmName(name) }
+
                 case .ready:
                     readyView
+
                 case .playing:
                     playingView(in: geo)
+
                 case .gameOver:
-                    gameOverView
+                    ResultView(
+                        mode: .tapFrenzy,
+                        headline: "⏱ Time's Up!",
+                        score: vm.score,
+                        subtitle: "Final Score",
+                        extraInfo: nil,
+                        statusMessage: vm.statusMessage,
+                        scores: vm.scores,
+                        highlightedID: vm.lastEntryID,
+                        onHome: { dismiss() },
+                        onPlayAgain: { vm.startGame() }
+                    )
                 }
 
                 backButton
@@ -71,7 +45,8 @@ struct TapFrenzyView: View {
             .frame(width: geo.size.width, height: geo.size.height)
         }
         .navigationBarHidden(true)
-        .onDisappear { stopTimers() }
+        .onAppear { vm.loadLeaderboard() }
+        .onDisappear { vm.stopTimers() }
     }
 
     private var backgroundGradient: some View {
