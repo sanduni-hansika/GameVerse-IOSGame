@@ -1,26 +1,25 @@
 import SwiftUI
 
 struct GameTitleBadge: View {
-    let systemImage: String
-    let title: String
-    let colors: [Color]
+    let playerName: String
+    let accentColor: Color
+    let onChangeName: () -> Void
 
-    var body: some View {
-        VStack(spacing: 12) {
-            ZStack {
-                Circle()
-                    .fill(LinearGradient(colors: colors, startPoint: .topLeading, endPoint: .bottomTrailing))
-                    .frame(width: 62, height: 62)
-                    .shadow(color: colors.first?.opacity(0.5) ?? .clear, radius: 12, y: 4)
-
-                Image(systemName: systemImage)
-                    .font(.system(size: 26, weight: .bold))
-                    .foregroundColor(.white)
-            }
-
-            Text(title)
-                .font(.system(size: 28, weight: .heavy, design: .rounded))
+      var body: some View {
+        HStack(spacing: 4) {
+            Text("Playing as")
+                .foregroundColor(.white.opacity(0.5))
+            Text(playerName)
                 .foregroundColor(.white)
+                .fontWeight(.semibold)
+            Text("·")
+                .foregroundColor(.white.opacity(0.3))
+            Button(action: onChangeName) {
+                Text("Change")
+                    .foregroundColor(accentColor)
+                    .fontWeight(.semibold)
+            }
         }
+        .font(.footnote)
     }
 }
