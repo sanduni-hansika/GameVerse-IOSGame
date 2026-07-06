@@ -6,3 +6,20 @@ DerivedData/
 .swiftpm/configuration/registries.json
 .swiftpm/xcode/package.xcworkspace/contents.xcworkspacedata
 .netrc
+
+# Swift Package build
+.build/
+
+# Xcode / Mac
+.DS_Store
+*.xcuserstate
+
+# VS Code
+.vscode/
+
+# Swift Package Manager
+Packages/
+Package.resolved
+
+# Logs
+*.log
