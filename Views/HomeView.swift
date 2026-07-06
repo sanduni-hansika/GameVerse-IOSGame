@@ -2,8 +2,9 @@ import SwiftUI
 
 struct HomeView: View {
 
-    @AppStorage("TapFrenzyHighScore") private var tapFrenzyHighScore: Int = 0
-    @AppStorage("LightItUpHighScore") private var lightItUpHighScore: Int = 0
+    @State private var tapFrenzyBest: Int = ScoreHistoryStore.bestScore(for: "TapFrenzyHistory")
+    @State private var lightItUpBest: Int = ScoreHistoryStore.bestScore(for: "LightItUpHistory")
+    @State private var quizRushBest: Int = ScoreHistoryStore.bestScore(for: "QuizRushHistory")
 
     var body: some View {
         NavigationStack {
@@ -14,7 +15,7 @@ struct HomeView: View {
                     VStack(spacing: 32) {
                         header
 
-                        VStack(spacing: 18) {
+                        VStack(spacing: 16) {
                             GameModeCard(
                                 title: "Tap Frenzy",
                                 subtitle: "Tap as fast as you can before the 10s clock runs out.",
@@ -34,6 +35,17 @@ struct HomeView: View {
                             ) {
                                 LightItUpView()
                             }
+
+                        GameModeCard(
+                                title: "Quiz Rush",
+                                subtitle: "10 live trivia questions. Build a streak for bonus points.",
+                                systemImage: "questionmark.circle.fill",
+                                colors: [.orange, .red],
+                                highScore: quizRushBest
+                            ) {
+                                QuizRushView()
+                            }
+
                         }
                         .padding(.horizontal, 24)
 
@@ -44,6 +56,7 @@ struct HomeView: View {
                 }
             }
             .navigationBarHidden(true)
+            .onAppear(perform: refreshScores)
         }
     }
 
@@ -58,9 +71,17 @@ struct HomeView: View {
     }
 
     private var header: some View {
-        VStack(spacing: 8) {
-            Text("🎮")
-                .font(.system(size: 44))
+        VStack(spacing: 10) {
+            ZStack {
+                Circle()
+                    .fill(LinearGradient(colors: [.blue, .pink], startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .frame(width: 60, height: 60)
+                    .shadow(color: .pink.opacity(0.4), radius: 12, y: 4)
+
+                Image(systemName: "gamecontroller.fill")
+                    .font(.system(size: 26, weight: .bold))
+                    .foregroundColor(.white)
+            }
 
             Text("GameVerse")
                 .font(.system(size: 40, weight: .heavy, design: .rounded))
@@ -73,11 +94,18 @@ struct HomeView: View {
     }
 
     private var footer: some View {
-        Text("BSc(Hons) Computing · iOS App Development · Week 2")
+        Text("Let's play")
             .font(.caption)
             .foregroundColor(.white.opacity(0.3))
             .padding(.top, 12)
     }
+
+    private func refreshScores() {
+        tapFrenzyBest = ScoreHistoryStore.bestScore(for: "TapFrenzyHistory")
+        lightItUpBest = ScoreHistoryStore.bestScore(for: "LightItUpHistory")
+        quizRushBest = ScoreHistoryStore.bestScore(for: "QuizRushHistory")
+    }
+
 }
 
 #Preview {
