@@ -49,8 +49,6 @@ struct TapFrenzyView: View {
         .onDisappear { vm.stopTimers() }
     }
 
-    // MARK: - Chrome
-
     private var backgroundGradient: some View {
         LinearGradient(
             colors: [Color(red: 0.05, green: 0.05, blue: 0.15),
