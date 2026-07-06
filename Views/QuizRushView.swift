@@ -42,8 +42,6 @@ struct QuizRushView: View {
         .navigationBarHidden(true)
     }
 
-    // MARK: - Chrome
-
     private var backgroundGradient: some View {
         LinearGradient(
             colors: [Color(red: 0.05, green: 0.04, blue: 0.1),
@@ -71,8 +69,6 @@ struct QuizRushView: View {
             Spacer()
         }
     }
-
-    // MARK: - Name Entry Screen
 
     private var nameEntryView: some View {
         VStack(spacing: 26) {
@@ -104,7 +100,6 @@ struct QuizRushView: View {
         .padding()
     }
 
-    // MARK: - Ready Screen
 
     private var readyView: some View {
         ScrollView {
@@ -162,4 +157,152 @@ struct QuizRushView: View {
                 .foregroundColor(.orange)
         }
         .font(.footnote)
+    }
+
+     private var playingShell: some View {
+        Group {
+            switch viewModel.state {
+            case .loading:
+                loadingView
+            case .failed:
+                errorView
+            case .loaded:
+                quizContentView
+            }
+        }
+        .task { await viewModel.load() }
+    }
+
+    private var loadingView: some View {
+        VStack(spacing: 16) {
+            ProgressView()
+                .tint(.white)
+                .scaleEffect(1.4)
+            Text("Loading questions…")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.6))
+        }
+    }
+
+    private var errorView: some View {
+        VStack(spacing: 16) {
+            Image(systemName: "wifi.exclamationmark")
+                .font(.system(size: 40))
+                .foregroundColor(.white.opacity(0.5))
+            Text("Couldn't load questions")
+                .font(.headline)
+                .foregroundColor(.white)
+            Text("Check your connection and try again.")
+                .font(.footnote)
+                .foregroundColor(.white.opacity(0.5))
+
+            Button(action: { Task { await viewModel.load() } }) {
+                Text("Retry")
+                    .font(.headline.bold())
+                    .foregroundColor(.black)
+                    .padding(.horizontal, 36)
+                    .padding(.vertical, 14)
+                    .background(
+                        Capsule().fill(LinearGradient(colors: accentColors, startPoint: .leading, endPoint: .trailing))
+                    )
+            }
+            .padding(.top, 6)
+        }
+        .padding()
+    }
+
+    private var quizContentView: some View {
+        VStack(spacing: 24) {
+            hud
+
+            if let question = viewModel.currentQuestion {
+                VStack(spacing: 22) {
+                    Text(question.question.htmlDecoded)
+                        .font(.title3.weight(.semibold))
+                        .foregroundColor(.white)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 26)
+                        .frame(minHeight: 90)
+
+                    VStack(spacing: 12) {
+                        ForEach(viewModel.answerOptions, id: \.self) { option in
+                            AnswerOptionButton(
+                                text: option,
+                                style: style(for: option),
+                                isDisabled: viewModel.isAnswerLocked
+                            ) {
+                                handleSelect(option)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 24)
+                }
+            }
+
+            Spacer()
+        }
+        .overlay(pointsPopup)
+        .padding(.top, 4)
+    }
+
+    private var hud: some View {
+        VStack(spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("SCORE")
+                        .font(.caption.bold())
+                        .foregroundColor(.white.opacity(0.5))
+                    Text("\(viewModel.score)")
+                        .font(.system(size: 28, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                }
+
+                Spacer()
+
+                VStack(spacing: 2) {
+                    Text("QUESTION")
+                        .font(.caption.bold())
+                        .foregroundColor(.white.opacity(0.5))
+                    Text("\(viewModel.currentIndex + 1) of \(viewModel.totalQuestions)")
+                        .font(.subheadline.bold())
+                        .foregroundColor(.white)
+                }
+
+                Spacer()
+
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("STREAK")
+                        .font(.caption.bold())
+                        .foregroundColor(.white.opacity(0.5))
+                    HStack(spacing: 4) {
+                        Image(systemName: "flame.fill")
+                            .font(.caption)
+                            .foregroundColor(.orange)
+                        Text("\(viewModel.streak)")
+                            .font(.system(size: 22, weight: .heavy, design: .rounded))
+                            .foregroundColor(.white)
+                    }
+                }
+            }
+
+            LevelProgressBar(
+                total: viewModel.totalQuestions,
+                currentIndex: viewModel.currentIndex,
+                colors: accentColors
+            )
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 60)
+    }
+
+    private var pointsPopup: some View {
+        Group {
+            if popupVisible {
+                Text(viewModel.lastPointsEarned >= 0 ? "+\(viewModel.lastPointsEarned)" : "\(viewModel.lastPointsEarned)")
+                    .font(.title.bold())
+                    .foregroundColor(viewModel.lastPointsEarned >= 0 ? .green : .red)
+                    .offset(y: popupOffset)
+                    .opacity(popupOpacity)
+            }
+        }
     }
