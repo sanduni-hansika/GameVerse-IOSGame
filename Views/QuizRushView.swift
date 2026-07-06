@@ -306,3 +306,74 @@ struct QuizRushView: View {
             }
         }
     }
+
+    private var gameOverView: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                HStack(spacing: 8) {
+                    Image(systemName: "flag.checkered")
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("Quiz Complete")
+                        .font(.system(size: 28, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                }
+                .padding(.top, 20)
+
+                Text("\(viewModel.score)")
+                    .font(.system(size: 64, weight: .black, design: .rounded))
+                    .foregroundColor(.orange)
+
+                Text("Final Score")
+                    .font(.headline)
+                    .foregroundColor(.white.opacity(0.6))
+
+                leaderboardBadge
+
+                HStack(spacing: 14) {
+                    Button(action: { dismiss() }) {
+                        Text("Home")
+                            .font(.headline.bold())
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 14)
+                            .background(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1.5))
+                    }
+
+                    Button(action: startGame) {
+                        Text("Play Again")
+                            .font(.headline.bold())
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 14)
+                            .background(
+                                Capsule().fill(LinearGradient(colors: accentColors, startPoint: .leading, endPoint: .trailing))
+                            )
+                            .shadow(color: accentColors[0].opacity(0.5), radius: 14, y: 6)
+                    }
+                }
+                .padding(.top, 4)
+
+                ScoreHistoryView(
+                    title: "TOP SCORES",
+                    scores: scoreHistory,
+                    highlightID: lastEntryID,
+                    accentColor: accentColors[0]
+                )
+                .padding(.horizontal, 28)
+                .padding(.top, 10)
+            }
+            .padding(.bottom, 24)
+        }
+    }
+
+    @ViewBuilder
+    private var leaderboardBadge: some View {
+        if lastEntryID != nil {
+            HStack(spacing: 6) {
+                Image(systemName: "trophy.fill").foregroundColor(.yellow)
+                Text(scoreHistory.first?.id == lastEntryID ? "New personal best" : "Made the top 5")
+                    .foregroundColor(.yellow)
+            }
+            .font(.subheadline.bold())
+        }
+    }
