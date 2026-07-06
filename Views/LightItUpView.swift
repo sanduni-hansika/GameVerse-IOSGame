@@ -4,26 +4,41 @@ struct LightItUpView: View {
 
     @Environment(\.dismiss) private var dismiss
 
+    private static let historyKey = "LightItUpHistory"
+    private let accentColors: [Color] = [.blue, .purple]
+
+
     private let roundDuration: Double = 60.0
 
-    @State private var gameState: GameRoundState = .ready
+    @State private var gameState: GameRoundState = .nameEntry
+    @State private var playerName: String = ""
     @State private var score: Int = 0
     @State private var timeRemaining: Double = 60.0
     @State private var level: GameLevel = .l1
-    @AppStorage("LightItUpHighScore") private var highScore: Int = 0
-    @State private var isNewHighScore: Bool = false
+
+    @State private var scoreHistory: [PlayerScore] = ScoreHistoryStore.load(for: LightItUpView.historyKey)
+    @State private var lastEntryID: UUID? = nil
 
     @State private var cards: [Card] = []
     @State private var showLevelUpFlash: Bool = false
+    @State private var popups: [ScorePopup] = []
 
     @State private var countdownTimer: Timer? = nil
     @State private var lightTimer: Timer? = nil
+
+    private var trimmedName: String {
+        playerName.trimmingCharacters(in: .whitespaces)
+    }
 
     var body: some View {
         ZStack {
             backgroundGradient
 
+            backgroundGradient
+
             switch gameState {
+            case .nameEntry:
+                nameEntryView
             case .ready:
                 readyView
             case .playing:
@@ -82,11 +97,40 @@ struct LightItUpView: View {
         .allowsHitTesting(false)
     } 
 
+ private var nameEntryView: some View {
+        VStack(spacing: 26) {
+            GameTitleBadge(systemImage: "square.grid.3x3.fill", title: "Light It Up", colors: accentColors)
+
+            Text("Enter your name to start the round.")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.65))
+
+            PlayerNameField(name: $playerName, accentColors: accentColors)
+                .padding(.horizontal, 36)
+
+            Button(action: { gameState = .ready }) {
+                Text("Continue")
+                    .font(.headline.bold())
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 15)
+                    .background(
+                        Capsule().fill(
+                            trimmedName.isEmpty
+                                ? AnyShapeStyle(Color.white.opacity(0.15))
+                                : AnyShapeStyle(LinearGradient(colors: accentColors, startPoint: .leading, endPoint: .trailing))
+                        )
+                    )
+                    .foregroundColor(trimmedName.isEmpty ? .white.opacity(0.4) : .black)
+            }
+            .disabled(trimmedName.isEmpty)
+        }
+        .padding()
+    }
+
 private var readyView: some View {
-        VStack(spacing: 22) {
-            Text("💡 Light It Up")
-                .font(.system(size: 40, weight: .heavy, design: .rounded))
-                .foregroundColor(.white)
+        ScrollView {
+            VStack(spacing: 22) {
+                GameTitleBadge(systemImage: "square.grid.3x3.fill", title: "Light It Up", colors: accentColors)
 
             Text("A card lights up — tap it before it goes dark.\nThe grid grows and the window shrinks as you go.")
                 .font(.headline)
@@ -94,47 +138,59 @@ private var readyView: some View {
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 36)
 
-            HStack(spacing: 10) {
+            HStack(spacing: 16) {
                 ForEach(GameLevel.allCases, id: \.self) { lvl in
                     VStack(spacing: 4) {
                         Circle()
                             .fill(lvl.glowColor)
-                            .frame(width: 12, height: 12)
+                            .frame(width: 10, height: 10)
                         Text(lvl.label)
                             .font(.caption2.bold())
-                            .foregroundColor(.white.opacity(0.6))
+                            .foregroundColor(.white.opacity(0.55))
+                          }
                     }
                 }
-            }
-            .padding(.top, 4)
+             playerBadge
 
-            if highScore > 0 {
-                Text("🏆 High Score: \(highScore)")
-                    .font(.title3.bold())
-                    .foregroundColor(.yellow)
-                    .padding(.top, 6)
-            }
-
-            Button(action: startGame) {
-                Text("Start Game")
-                    .font(.title2.bold())
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 44)
-                    .padding(.vertical, 16)
-                    .background(
-                        Capsule().fill(
-                            LinearGradient(colors: [.blue, .purple],
-                                           startPoint: .leading, endPoint: .trailing)
+                Button(action: startGame) {
+                    Text("Start Game")
+                        .font(.title2.bold())
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 44)
+                        .padding(.vertical, 16)
+                        .background(
+                            Capsule().fill(LinearGradient(colors: accentColors, startPoint: .leading, endPoint: .trailing))
                         )
-                    )
-                    .shadow(color: .blue.opacity(0.5), radius: 14, y: 6)
+                        .shadow(color: accentColors[0].opacity(0.5), radius: 14, y: 6)
+                }
+
+                ScoreHistoryView(
+                    title: "TOP SCORES",
+                    scores: scoreHistory,
+                    accentColor: accentColors[0]
+                )
+                .padding(.horizontal, 28)
+                .padding(.top, 6)
             }
-            .padding(.top, 10)
+            .padding(.vertical, 24)
         }
-        .padding()
     }
 
+    private var playerBadge: some View {
+        HStack(spacing: 6) {
+            Text("Playing as")
+                .foregroundColor(.white.opacity(0.5))
+            Text(trimmedName)
+                .foregroundColor(.white)
+                .fontWeight(.semibold)
+            Button("Change") { gameState = .nameEntry }
+                .font(.caption.bold())
+                .foregroundColor(.blue)
+        }
+        .font(.footnote)
+    }
  private var playingView: some View {
+    ZStack {
         VStack(spacing: 0) {
             hud
 
@@ -155,6 +211,16 @@ private var readyView: some View {
 
             Spacer()
             Spacer()
+        }
+
+ForEach(popups) { popup in
+                Text(popup.label)
+                    .font(.title2.bold())
+                    .foregroundColor(popup.color)
+                    .shadow(color: .black.opacity(0.4), radius: 3)
+                    .position(x: popup.position.x, y: popup.position.y + popup.offsetY)
+                    .opacity(popup.opacity)
+            }
         }
         .onAppear { setupRound() }
     }
@@ -198,63 +264,78 @@ private var readyView: some View {
     }
 
 private var gameOverView: some View {
-        VStack(spacing: 18) {
-            Text("⏱ Round Over!")
-                .font(.system(size: 34, weight: .heavy, design: .rounded))
-                .foregroundColor(.white)
-
-            Text("\(score)")
-                .font(.system(size: 68, weight: .black, design: .rounded))
-                .foregroundColor(.blue)
-
-            Text("Final Score")
-                .font(.headline)
-                .foregroundColor(.white.opacity(0.6))
-
-            Text("Reached \(level.label)")
-                .font(.subheadline.bold())
-                .foregroundColor(level.glowColor)
-
-            if isNewHighScore {
-                Text("🎉 New High Score!")
-                    .font(.title3.bold())
-                    .foregroundColor(.yellow)
-            } else {
-                Text("🏆 High Score: \(highScore)")
-                    .font(.title3.bold())
-                    .foregroundColor(.white.opacity(0.7))
-            }
-
-            HStack(spacing: 14) {
-                Button(action: { dismiss() }) {
-                    Text("Home")
-                        .font(.headline.bold())
+        ScrollView {
+            VStack(spacing: 16) {
+                HStack(spacing: 8) {
+                    Image(systemName: "flag.checkered")
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("Round Over")
+                        .font(.system(size: 30, weight: .heavy, design: .rounded))
                         .foregroundColor(.white)
-                        .padding(.horizontal, 28)
-                        .padding(.vertical, 14)
-                        .background(
-                            Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1.5)
-                        )
                 }
+                .padding(.top, 20)
 
-                Button(action: startGame) {
-                    Text("Play Again")
-                        .font(.headline.bold())
-                        .foregroundColor(.black)
-                        .padding(.horizontal, 28)
-                        .padding(.vertical, 14)
-                        .background(
-                            Capsule().fill(
-                                LinearGradient(colors: [.blue, .purple],
-                                               startPoint: .leading, endPoint: .trailing)
+                Text("\(score)")
+                    .font(.system(size: 68, weight: .black, design: .rounded))
+                    .foregroundColor(.blue)
+
+                Text("Final Score")
+                    .font(.headline)
+                    .foregroundColor(.white.opacity(0.6))
+
+                Text("Reached \(level.label)")
+                    .font(.subheadline.bold())
+                    .foregroundColor(level.glowColor)
+
+                leaderboardBadge
+
+                HStack(spacing: 14) {
+                    Button(action: { dismiss() }) {
+                        Text("Home")
+                            .font(.headline.bold())
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 14)
+                            .background(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1.5))
+                    }
+
+                    Button(action: startGame) {
+                        Text("Play Again")
+                            .font(.headline.bold())
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 14)
+                            .background(
+                                Capsule().fill(LinearGradient(colors: accentColors, startPoint: .leading, endPoint: .trailing))
                             )
-                        )
-                        .shadow(color: .blue.opacity(0.5), radius: 14, y: 6)
+                            .shadow(color: accentColors[0].opacity(0.5), radius: 14, y: 6)
+                    }
                 }
+                .padding(.top, 4)
+
+                ScoreHistoryView(
+                    title: "TOP SCORES",
+                    scores: scoreHistory,
+                    highlightID: lastEntryID,
+                    accentColor: accentColors[0]
+                )
+                .padding(.horizontal, 28)
+                .padding(.top, 10)
             }
-            .padding(.top, 12)
+            .padding(.bottom, 24)
         }
-        .padding()
+    }
+
+    @ViewBuilder
+    private var leaderboardBadge: some View {
+        if lastEntryID != nil {
+            HStack(spacing: 6) {
+                Image(systemName: "trophy.fill").foregroundColor(.yellow)
+                Text(scoreHistory.first?.id == lastEntryID ? "New personal best" : "Made the top 5")
+                    .foregroundColor(.yellow)
+            }
+            .font(.subheadline.bold())
+        }
     }
 
  private func startGame() {
@@ -289,12 +370,10 @@ private var gameOverView: some View {
         }
     }
 
- /// (Re)builds the grid for the current level, all cards starting dim.
     private func resetCardsForCurrentLevel() {
         cards = (0..<level.cardCount).map { Card(id: $0, isLit: false) }
     }
 
-    /// Restarts the lighting timer at the current level's interval.
     private func startLightTimer() {
         lightTimer?.invalidate()
         lightTimer = Timer.scheduledTimer(withTimeInterval: level.litWindow, repeats: true) { _ in
@@ -302,8 +381,6 @@ private var gameOverView: some View {
         }
     }
 
-    /// Fires every `level.litWindow` seconds: penalizes missed cards,
-    /// then lights a fresh random set.
     private func tick() {
         guard gameState == .playing else { return }
 
@@ -344,6 +421,25 @@ private func handleTap(_ card: Card) {
         score = max(0, score - 1)
     }
 
+    private func spawnScorePopup(correct: Bool) {
+        let screenSize = UIScreen.main.bounds.size
+        var popup = ScorePopup(position: CGPoint(x: screenSize.width / 2, y: screenSize.height * 0.42))
+        popup.label = correct ? "+1" : "-1"
+        popup.color = correct ? .green : .red
+        popups.append(popup)
+
+        withAnimation(.easeOut(duration: 0.6)) {
+            if let index = popups.firstIndex(where: { $0.id == popup.id }) {
+                popups[index].offsetY = -40
+                popups[index].opacity = 0
+            }
+        }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            popups.removeAll { $0.id == popup.id }
+        }
+    }
+
     private func triggerLevelUpFlash() {
         withAnimation(.easeIn(duration: 0.15)) { showLevelUpFlash = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
@@ -353,10 +449,10 @@ private func handleTap(_ card: Card) {
 
 private func endGame() {
         stopTimers()
-        if score > highScore {
-            highScore = score
-            isNewHighScore = true
-        }
+        let name = trimmedName.isEmpty ? "Player" : trimmedName
+        let result = ScoreHistoryStore.record(score, playerName: name, for: Self.historyKey)
+        scoreHistory = result.top5
+        lastEntryID = result.top5.contains(where: { $0.id == result.entryID }) ? result.entryID : nil
         gameState = .gameOver
     }
 
