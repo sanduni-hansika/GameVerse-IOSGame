@@ -1,10 +1,7 @@
 import SwiftUI
 
 struct GameModeCard<Destination: View>: View {
-    let title: String
-    let subtitle: String
-    let systemImage: String
-    let colors: [Color]
+    let mode: GameMode
     let highScore: Int
     @ViewBuilder let destination: () -> Destination
 
@@ -14,33 +11,31 @@ struct GameModeCard<Destination: View>: View {
                 ZStack {
                     Circle()
                         .fill(
-                            LinearGradient(colors: colors,
+                            LinearGradient(colors: mode.colors,
                                            startPoint: .topLeading,
                                            endPoint: .bottomTrailing)
                         )
                         .frame(width: 64, height: 64)
-                        .shadow(color: colors.first?.opacity(0.5) ?? .clear, radius: 10, y: 4)
+                        .shadow(color: mode.colors.first?.opacity(0.5) ?? .clear, radius: 10, y: 4)
 
-                    Image(systemName: systemImage)
+                    Image(systemName: mode.systemImage)
                         .font(.system(size: 26, weight: .bold))
                         .foregroundColor(.white)
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(title)
+                    Text(mode.displayName)
                         .font(.title3.bold())
                         .foregroundColor(.white)
 
-                    Text(subtitle)
+                    Text(mode.tagline)
                         .font(.subheadline)
                         .foregroundColor(.white.opacity(0.65))
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
 
                     if highScore > 0 {
-                        Text("Best: \(highScore)")
-                            .font(.caption.bold())
-                            .foregroundColor(.yellow)
+                        ScoreBadge(icon: "trophy.fill", text: "Best: \(highScore)", tint: .yellow)
                             .padding(.top, 2)
                     }
                 }
