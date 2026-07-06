@@ -9,11 +9,18 @@ enum GameState {
 struct ScorePopup: Identifiable {
     let id = UUID()
     var position: CGPoint
+    var label: String = "+1"
+    var color: Color = .green
     var opacity: Double = 1.0
     var offsetY: CGFloat = 0
 }
 
-struct ContentView: View {
+struct TapFrenzyView: View {
+
+@Environment(\.dismiss) private var dismiss
+
+    private static let historyKey = "TapFrenzyHistory"
+    private let accentColors: [Color] = [.orange, .pink]
 
     private let gameDuration: Double = 10.0
     private let buttonBaseSize: CGFloat = 140
@@ -21,11 +28,13 @@ struct ContentView: View {
     private let moveInterval: Double = 2.0
 
 
-    @State private var gameState: GameState = .ready
+    @State private var gameState: GameRoundState = .nameEntry
+    @State private var playerName: String = ""
     @State private var score: Int = 0
     @State private var timeRemaining: Double = 10.0
-    @AppStorage("TapFrenzyHighScore") private var highScore: Int = 0
-    @State private var isNewHighScore: Bool = false
+
+    @State private var scoreHistory: [PlayerScore] = ScoreHistoryStore.load(for: TapFrenzyView.historyKey)
+    @State private var lastEntryID: UUID? = nil
 
     @State private var buttonOffset: CGSize = .zero
     @State private var buttonSize: CGFloat = 140
@@ -37,12 +46,18 @@ struct ContentView: View {
 
     @State private var isPressed: Bool = false
 
+    private var trimmedName: String {
+        playerName.trimmingCharacters(in: .whitespaces)
+    }
+
     var body: some View {
         GeometryReader { geo in
             ZStack {
                 backgroundGradient
 
                 switch gameState {
+                case .nameEntry:
+                      nameEntryView
                 case .ready:
                     readyView
                 case .playing:
@@ -50,9 +65,13 @@ struct ContentView: View {
                 case .gameOver:
                     gameOverView
                 }
+
+                backButton
             }
             .frame(width: geo.size.width, height: geo.size.height)
         }
+        .navigationBarHidden(true)
+        .onDisappear { stopTimers() }
     }
 
     private var backgroundGradient: some View {
@@ -65,79 +84,139 @@ struct ContentView: View {
         .ignoresSafeArea()
     }
 
-private var readyView: some View {
-        VStack(spacing: 22) {
-            Text("⚡️ Tap Frenzy")
-                .font(.system(size: 44, weight: .heavy, design: .rounded))
-                .foregroundColor(.white)
- 
-            Text("Tap as many times as you can in \(Int(gameDuration)) seconds!")
-                .font(.headline)
-                .foregroundColor(.white.opacity(0.75))
-                .multilineTextAlignment(.center)
-                .padding(.horizontal, 40)
- 
-            VStack(alignment: .leading, spacing: 10) {
-                Label("Button shrinks as time runs out", systemImage: "arrow.down.right.and.arrow.up.left.circle.fill")
-                Label("Button jumps to a new spot every 2s", systemImage: "arrow.left.arrow.right.circle.fill")
+private var backButton: some View {
+        VStack {
+            HStack {
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
+                        .font(.headline.bold())
+                        .foregroundColor(.white)
+                        .padding(10)
+                        .background(Circle().fill(Color.white.opacity(0.12)))
+                }
+                .padding(.leading, 16)
+                .padding(.top, 12)
+                Spacer()
             }
-            .font(.subheadline.weight(.medium))
-            .foregroundColor(.white.opacity(0.65))
-            .padding(.top, 4)
- 
-            if highScore > 0 {
-                Text("🏆 High Score: \(highScore)")
-                    .font(.title3.bold())
-                    .foregroundColor(.yellow)
-                    .padding(.top, 10)
-            }
- 
-            Button(action: startGame) {
-                Text("Start Game")
-                    .font(.title2.bold())
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 44)
-                    .padding(.vertical, 16)
+            Spacer()
+        }
+    }
+
+    private var nameEntryView: some View {
+        VStack(spacing: 26) {
+            GameTitleBadge(systemImage: "bolt.fill", title: "Tap Frenzy", colors: accentColors)
+
+            Text("Enter your name to start the round.")
+                .font(.subheadline)
+                .foregroundColor(.white.opacity(0.65))
+
+            PlayerNameField(name: $playerName, accentColors: accentColors)
+                .padding(.horizontal, 36)
+
+            Button(action: { gameState = .ready }) {
+                Text("Continue")
+                    .font(.headline.bold())
+                    .padding(.horizontal, 40)
+                    .padding(.vertical, 15)
                     .background(
                         Capsule().fill(
-                            LinearGradient(colors: [.green, .mint],
-                                           startPoint: .leading, endPoint: .trailing)
+                            trimmedName.isEmpty
+                                ? AnyShapeStyle(Color.white.opacity(0.15))
+                                : AnyShapeStyle(LinearGradient(colors: accentColors, startPoint: .leading, endPoint: .trailing))
                         )
                     )
-                    .shadow(color: .green.opacity(0.5), radius: 14, y: 6)
+                    .foregroundColor(trimmedName.isEmpty ? .white.opacity(0.4) : .black)
             }
-            .padding(.top, 14)
+            .disabled(trimmedName.isEmpty)
         }
         .padding()
     }
- 
-private func playingView(in geo: GeometryProxy) -> some View {
+
+private var readyView: some View {
+        ScrollView {
+            VStack(spacing: 22) {
+                GameTitleBadge(systemImage: "bolt.fill", title: "Tap Frenzy", colors: accentColors)
+
+                Text("Tap as many times as you can in \(Int(gameDuration)) seconds!")
+                    .font(.headline)
+                    .foregroundColor(.white.opacity(0.75))
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("Button shrinks as time runs out", systemImage: "arrow.down.right.and.arrow.up.left.circle.fill")
+                    Label("Button jumps to a new spot every 2s", systemImage: "arrow.left.arrow.right.circle.fill")
+                }
+                .font(.subheadline.weight(.medium))
+                .foregroundColor(.white.opacity(0.65))
+
+                playerBadge
+
+                Button(action: startGame) {
+                    Text("Start Game")
+                        .font(.title2.bold())
+                        .foregroundColor(.black)
+                        .padding(.horizontal, 44)
+                        .padding(.vertical, 16)
+                        .background(
+                            Capsule().fill(
+                                LinearGradient(colors: accentColors, startPoint: .leading, endPoint: .trailing)
+                            )
+                        )
+                        .shadow(color: accentColors[0].opacity(0.5), radius: 14, y: 6)
+                }
+
+                ScoreHistoryView(
+                    title: "TOP SCORES",
+                    scores: scoreHistory,
+                    accentColor: accentColors[0]
+                )
+                .padding(.horizontal, 28)
+                .padding(.top, 6)
+            }
+            .padding(.vertical, 24)
+        }
+    }
+
+    private var playerBadge: some View {
+        HStack(spacing: 6) {
+            Text("Playing as")
+                .foregroundColor(.white.opacity(0.5))
+            Text(trimmedName)
+                .foregroundColor(.white)
+                .fontWeight(.semibold)
+            Button("Change") { gameState = .nameEntry }
+                .font(.caption.bold())
+                .foregroundColor(.orange)
+        }
+        .font(.footnote)
+    }
+
+    private func playingView(in geo: GeometryProxy) -> some View {
         ZStack {
             VStack {
                 hud
                 Spacer()
             }
- 
+
             tapButton
                 .offset(buttonOffset)
                 .animation(.spring(response: 0.45, dampingFraction: 0.65), value: buttonOffset)
                 .animation(.easeInOut(duration: 0.25), value: buttonSize)
                 .position(x: geo.size.width / 2, y: geo.size.height / 2)
- 
-            
+
             ForEach(popups) { popup in
-                Text("+1")
+                Text(popup.label)
                     .font(.title.bold())
-                    .foregroundColor(.green)
+                    .foregroundColor(popup.color)
                     .shadow(color: .black.opacity(0.4), radius: 3)
                     .position(x: popup.position.x, y: popup.position.y + popup.offsetY)
                     .opacity(popup.opacity)
             }
         }
         .onAppear { setupRound(in: geo) }
-        .onDisappear { stopTimers() }
     }
- 
+
     private var hud: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
@@ -184,47 +263,75 @@ private var tapButton: some View {
         .buttonStyle(.plain)
     }
 
-private var gameOverView: some View {
-        VStack(spacing: 18) {
-            Text("⏱ Time's Up!")
-                .font(.system(size: 36, weight: .heavy, design: .rounded))
-                .foregroundColor(.white)
- 
-            Text("\(score)")
-                .font(.system(size: 72, weight: .black, design: .rounded))
-                .foregroundColor(.green)
- 
-            Text("Final Score")
-                .font(.headline)
-                .foregroundColor(.white.opacity(0.6))
- 
-            if isNewHighScore {
-                Text("🎉 New High Score!")
-                    .font(.title3.bold())
-                    .foregroundColor(.yellow)
-            } else {
-                Text("🏆 High Score: \(highScore)")
-                    .font(.title3.bold())
-                    .foregroundColor(.white.opacity(0.7))
+ private var gameOverView: some View {
+        ScrollView {
+            VStack(spacing: 16) {
+                HStack(spacing: 8) {
+                    Image(systemName: "clock.fill")
+                        .foregroundColor(.white.opacity(0.6))
+                    Text("Time's Up")
+                        .font(.system(size: 30, weight: .heavy, design: .rounded))
+                        .foregroundColor(.white)
+                }
+                .padding(.top, 20)
+
+                Text("\(score)")
+                    .font(.system(size: 68, weight: .black, design: .rounded))
+                    .foregroundColor(.green)
+
+                Text("Final Score")
+                    .font(.headline)
+                    .foregroundColor(.white.opacity(0.6))
+
+                leaderboardBadge
+
+                HStack(spacing: 14) {
+                    Button(action: { dismiss() }) {
+                        Text("Home")
+                            .font(.headline.bold())
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 14)
+                            .background(Capsule().stroke(Color.white.opacity(0.3), lineWidth: 1.5))
+                    }
+
+                    Button(action: startGame) {
+                        Text("Play Again")
+                            .font(.headline.bold())
+                            .foregroundColor(.black)
+                            .padding(.horizontal, 28)
+                            .padding(.vertical, 14)
+                            .background(
+                                Capsule().fill(LinearGradient(colors: accentColors, startPoint: .leading, endPoint: .trailing))
+                            )
+                            .shadow(color: accentColors[0].opacity(0.5), radius: 14, y: 6)
+                    }
+                }
+                .padding(.top, 4)
+
+                ScoreHistoryView(
+                    title: "TOP SCORES",
+                    scores: scoreHistory,
+                    highlightID: lastEntryID,
+                    accentColor: accentColors[0]
+                )
+                .padding(.horizontal, 28)
+                .padding(.top, 10)
             }
- 
-            Button(action: startGame) {
-                Text("Play Again")
-                    .font(.title2.bold())
-                    .foregroundColor(.black)
-                    .padding(.horizontal, 44)
-                    .padding(.vertical, 16)
-                    .background(
-                        Capsule().fill(
-                            LinearGradient(colors: [.green, .mint],
-                                           startPoint: .leading, endPoint: .trailing)
-                        )
-                    )
-                    .shadow(color: .green.opacity(0.5), radius: 14, y: 6)
-            }
-            .padding(.top, 12)
+            .padding(.bottom, 24)
         }
-        .padding()
+    }
+
+    @ViewBuilder
+    private var leaderboardBadge: some View {
+        if lastEntryID != nil {
+            HStack(spacing: 6) {
+                Image(systemName: "trophy.fill").foregroundColor(.yellow)
+                Text(scoreHistory.first?.id == lastEntryID ? "New personal best" : "Made the top 5")
+                    .foregroundColor(.yellow)
+            }
+            .font(.subheadline.bold())
+        }
     }
 
 private func startGame() {
@@ -334,5 +441,5 @@ private func randomizeButtonPosition(in geo: GeometryProxy) {
 }
 
 #Preview {
-    ContentView()
+    NavigationStack { TapFrenzyView() }
 }
