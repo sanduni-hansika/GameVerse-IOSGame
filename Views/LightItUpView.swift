@@ -69,7 +69,7 @@ struct LightItUpView: View {
 
             if vm.showScorePopup {
 
-                Text("+1")
+                Text(vm.scorePopupText)
                     .font(
                         .system(
                             size: 42,
