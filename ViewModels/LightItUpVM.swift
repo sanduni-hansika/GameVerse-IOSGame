@@ -18,7 +18,8 @@ final class LightItUpVM: ObservableObject {
 
     @Published var showLevelUpFlash: Bool = false
 
-    @Published var showScorePopup: Bool = false
+   @Published var scorePopupText: String = "+1"
+   @Published var showScorePopup: Bool = false
 
     @Published var scores: [PlayerScore] = []
     @Published var lastEntryID: UUID?
@@ -50,6 +51,8 @@ final class LightItUpVM: ObservableObject {
         timeRemaining = roundDuration
         level = .l1
         statusMessage = nil
+        scorePopupText = "+1"
+        showScorePopup = false
 
         resetCardsForCurrentLevel()
 
@@ -222,12 +225,14 @@ final class LightItUpVM: ObservableObject {
 
 
             if level == .l4 {
-        score += 2
-    } else {
-        score += 1
-    }
+                score += 2
+                scorePopupText = "+2"
+            } else {
+                score += 1
+                scorePopupText = "+1"
+            }
 
-    showScorePopup = true
+showScorePopup = true
 
 
 
