@@ -459,6 +459,47 @@ private func hudCard(
     )
 }
 
+private func answerLetter(_ answer:String)->String {
+
+    guard let index =
+            vm.currentQuestion?.answers.firstIndex(of: answer)
+    else {
+        return "?"
+    }
+
+    return String(
+        Character(
+            UnicodeScalar(65 + index)!
+        )
+    )
+}
+
+
+private func answerCircleColor(
+    _ answer:String,
+    _ correct:String
+)->Color {
+
+
+    guard vm.answerState != .none
+    else {
+        return .orange
+    }
+
+
+    if answer == correct {
+        return .green
+    }
+
+
+    if answer == vm.selectedAnswer {
+        return .red
+    }
+
+
+    return .gray
+
+}
 
     private func backgroundColor(for answer: String, correctAnswer: String) -> Color {
         guard vm.answerState != .none else { return Color.white.opacity(0.06) }
