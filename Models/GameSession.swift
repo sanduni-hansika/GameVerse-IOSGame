@@ -9,8 +9,28 @@ struct GameSession: Codable, Identifiable {
     let latitude: Double?
     let longitude: Double?
 
-    var coordinate: CLLocationCoordinate2D? {
-        guard let latitude, let longitude else { return nil }
-        return CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+   var coordinate: CLLocationCoordinate2D? {
+
+
+        guard let latitude,
+              let longitude
+
+        else {
+
+            return nil
+
+        }
+
+
+
+        return CLLocationCoordinate2D(
+
+            latitude: latitude,
+
+            longitude: longitude
+
+        )
+
     }
+
 }
