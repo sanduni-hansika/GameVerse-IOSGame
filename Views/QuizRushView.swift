@@ -162,16 +162,16 @@ struct QuizRushView: View {
     }
 
 
-private var hud: some View {
+    private var hud: some View {
 
-    HStack(spacing:12){
+        HStack(spacing:12){
 
-        hudCard(
-            title:"SCORE",
-            value:"\(vm.score)",
-            icon:"star.fill",
-            color:.yellow
-        )
+            hudCard(
+               title:"SCORE",
+               value:"\(vm.score)",
+               icon:"star.fill",
+               color:.yellow
+            )
 
 
         hudCard(
@@ -194,12 +194,12 @@ private var hud: some View {
 
 }
 
-private func hudCard(
-    title:String,
-    value:String,
-    icon:String,
-    color:Color
-)->some View {
+    private func hudCard(
+        title:String,
+        value:String,
+        icon:String,
+        color:Color
+    )->some View {
 
     VStack(spacing:6){
 
@@ -233,7 +233,6 @@ private func hudCard(
     )
 }
 
-
     private var errorView: some View {
         VStack(spacing: 16) {
             Image(systemName: "wifi.exclamationmark")
@@ -263,7 +262,7 @@ private func hudCard(
 
     private var quizContentView: some View {
 
-    VStack(spacing: 24) {
+      VStack(spacing: 24) {
 
         hud
 
@@ -351,13 +350,15 @@ private func hudCard(
 
         Spacer()
 
-    }
-    .padding(.top,70)
-    .overlay(alignment:.top){
+      }
+      .padding(.top,70)
+      .overlay(alignment:.top){
         scorePopup
+      } 
+    
     }
-
-    }
+    
+    
     private func answerButton(
     _ answer:String,
     correctAnswer:String
@@ -407,16 +408,16 @@ private func hudCard(
 
             if vm.answerState != .none {
 
-                Image(
-                    systemName:
-                        answer == correctAnswer
-                        ? "checkmark.circle.fill"
-                        :"xmark.circle.fill"
-                )
-                .foregroundColor(
-                    answer == correctAnswer
-                    ? .green
-                    :.red
+                if answer == correctAnswer {
+
+        Image(systemName: "checkmark.circle.fill")
+            .foregroundColor(.green)
+
+    } 
+            else if answer == vm.selectedAnswer {
+
+        Image(systemName: "xmark.circle.fill")
+            .foregroundColor(.red)
                 )
 
             }
