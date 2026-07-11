@@ -221,10 +221,13 @@ final class LightItUpVM: ObservableObject {
         if cards[index].isLit {
 
 
-            score += 1
+            if level == .l4 {
+        score += 2
+    } else {
+        score += 1
+    }
 
-
-            showScorePopup = true
+    showScorePopup = true
 
 
 
@@ -260,10 +263,9 @@ final class LightItUpVM: ObservableObject {
 
     private func applyPenalty() {
 
-        score = max(
-            0,
-            score - 1
-        )
+        if level == .l4 {
+        score = max(0, score - 1)
+        }
     }
 
 
