@@ -194,6 +194,45 @@ private var hud: some View {
 
 }
 
+private func hudCard(
+    title:String,
+    value:String,
+    icon:String,
+    color:Color
+)->some View {
+
+    VStack(spacing:6){
+
+        Image(systemName:icon)
+            .font(.title3)
+            .foregroundColor(color)
+
+
+        Text(value)
+            .font(.headline.bold())
+            .foregroundColor(.white)
+
+
+        Text(title)
+            .font(.caption2.bold())
+            .foregroundColor(.white.opacity(0.5))
+
+    }
+    .frame(maxWidth:.infinity)
+    .padding(.vertical,12)
+    .background(
+        RoundedRectangle(cornerRadius:18)
+            .fill(Color.white.opacity(0.08))
+    )
+    .overlay(
+        RoundedRectangle(cornerRadius:18)
+            .stroke(
+                color.opacity(0.4),
+                lineWidth:1
+            )
+    )
+}
+
 
 
     private var errorView: some View {
