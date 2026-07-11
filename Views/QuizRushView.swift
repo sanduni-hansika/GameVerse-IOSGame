@@ -188,69 +188,103 @@ struct QuizRushView: View {
         .padding()
     }
 
-
     private var quizContentView: some View {
-        VStack(spacing: 20) {
-            hud
 
-            LevelProgressBar(total: vm.questions.count, completed: vm.currentIndex, colors: [.orange, .red])
-                .padding(.horizontal, 24)
+    VStack(spacing: 24) {
 
-            if let question = vm.currentQuestion {
+        hud
+
+        LevelProgressBar(
+            total: vm.questions.count,
+            completed: vm.currentIndex,
+            colors: [.orange, .red]
+        )
+        .padding(.horizontal, 24)
+
+
+        if let question = vm.currentQuestion {
+
+            VStack(spacing: 18) {
+
+                Text("QUESTION \(vm.currentIndex + 1)")
+                    .font(.caption.bold())
+                    .foregroundColor(.orange)
+                    .padding(.horizontal,16)
+                    .padding(.vertical,8)
+                    .background(
+                        Capsule()
+                            .fill(Color.orange.opacity(0.15))
+                    )
+
+
                 Text(question.question)
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 22,
+                                  weight: .heavy,
+                                  design: .rounded))
                     .foregroundColor(.white)
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal, 22)
-                    .padding(.top, 8)
+                    .padding(.horizontal,20)
 
-                VStack(spacing: 10) {
-                    ForEach(question.answers, id: \.self) { answer in
-                        answerButton(answer, correctAnswer: question.correctAnswer)
-                    }
+            }
+            .padding(.vertical,28)
+            .frame(maxWidth:.infinity)
+            .background(
+                RoundedRectangle(cornerRadius: 28)
+                    .fill(
+                        LinearGradient(
+                            colors:[
+                                Color.white.opacity(0.12),
+                                Color.white.opacity(0.04)
+                            ],
+                            startPoint:.topLeading,
+                            endPoint:.bottomTrailing
+                        )
+                    )
+            )
+            .overlay(
+                RoundedRectangle(cornerRadius:28)
+                    .stroke(
+                        Color.orange.opacity(0.35),
+                        lineWidth:1
+                    )
+            )
+            .shadow(
+                color:.orange.opacity(0.25),
+                radius:20
+            )
+            .padding(.horizontal,20)
+
+
+
+            VStack(spacing:14){
+
+                ForEach(
+                    question.answers,
+                    id:\.self
+                ){ answer in
+
+                    answerButton(
+                        answer,
+                        correctAnswer: question.correctAnswer
+                    )
+
                 }
-                .padding(.horizontal, 22)
-                .padding(.top, 4)
-            }
 
-            Spacer()
+            }
+            .padding(.horizontal,20)
+
         }
-        .padding(.top, 60)
-        .overlay(alignment: .top) { scorePopup }
+
+
+        Spacer()
+
+    }
+    .padding(.top,70)
+    .overlay(alignment:.top){
+        scorePopup
     }
 
-    private var hud: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("SCORE")
-                    .font(.caption.bold())
-                    .foregroundColor(.white.opacity(0.45))
-                Text("\(vm.score)")
-                    .font(.system(size: 26, weight: .heavy, design: .rounded))
-                    .foregroundColor(.white)
-            }
-            Spacer()
-            VStack(spacing: 2) {
-                Text("QUESTION")
-                    .font(.caption.bold())
-                    .foregroundColor(.white.opacity(0.45))
-                Text("\(min(vm.currentIndex + 1, vm.questions.count)) of \(vm.questions.count)")
-                    .font(.subheadline.bold())
-                    .foregroundColor(.white)
-            }
-            Spacer()
-            VStack(alignment: .trailing, spacing: 2) {
-                Text("STREAK")
-                    .font(.caption.bold())
-                    .foregroundColor(.white.opacity(0.45))
-                Text("🔥 \(vm.streak)")
-                    .font(.subheadline.bold())
-                    .foregroundColor(.white)
-            }
-        }
-        .padding(.horizontal, 24)
     }
-
     private func answerButton(_ answer: String, correctAnswer: String) -> some View {
         Button(action: { handleAnswerTap(answer) }) {
             Text(answer)
