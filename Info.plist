@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Key:
+Privacy - Location When In Use Usage Description
+
+Type:
+String
+
+Value:
+GameVerse needs your location to save where you played games.</key>
+	<string>GameVerse needs your location to save where you played games.</string>
+</dict>
+</plist>

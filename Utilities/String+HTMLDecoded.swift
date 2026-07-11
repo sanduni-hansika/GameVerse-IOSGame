@@ -1,4 +1,5 @@
 import Foundation
+internal import UIKit
 
 extension String {
     var htmlDecoded: String {

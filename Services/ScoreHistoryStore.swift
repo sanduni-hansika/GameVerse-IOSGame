@@ -8,9 +8,6 @@ enum ScoreHistoryStore {
         return scores
     }
 
-    /// Submits a new score, keeps only the best 5, and returns the
-    /// updated list plus the id of the entry just submitted (so the
-    /// UI can highlight it, even if it didn't make the cut).
     @discardableResult
     static func submit(playerName: String, score: Int, key: String) -> (top: [PlayerScore], entryID: UUID) {
         var scores = topScores(for: key)

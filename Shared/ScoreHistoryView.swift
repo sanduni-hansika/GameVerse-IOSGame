@@ -46,7 +46,7 @@ struct ScoreHistoryView: View {
         }
     }
 
-     private func rankColor(_ index: Int) -> Color {
+    private func rankColor(_ index: Int) -> Color {
         switch index {
         case 0: return .yellow
         case 1: return .gray
