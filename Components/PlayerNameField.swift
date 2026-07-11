@@ -83,7 +83,15 @@ struct PlayerNameField: View {
     }
 
     private func attemptContinue() {
-        guard !trimmedName.isEmpty else { return }
-        onContinue(trimmedName)
+       print("BUTTON CLICKED")
+    print("NAME:", trimmedName)
+
+    guard !trimmedName.isEmpty else {
+        print("EMPTY NAME")
+        return
+    }
+
+    onContinue(trimmedName)
+
     }
 }
