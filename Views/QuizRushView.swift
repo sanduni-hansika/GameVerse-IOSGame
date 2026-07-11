@@ -161,6 +161,41 @@ struct QuizRushView: View {
         }
     }
 
+
+private var hud: some View {
+
+    HStack(spacing:12){
+
+        hudCard(
+            title:"SCORE",
+            value:"\(vm.score)",
+            icon:"star.fill",
+            color:.yellow
+        )
+
+
+        hudCard(
+            title:"QUESTION",
+            value:"\(vm.currentIndex + 1)/\(vm.questions.count)",
+            icon:"questionmark.circle.fill",
+            color:.orange
+        )
+
+
+        hudCard(
+            title:"STREAK",
+            value:"🔥 \(vm.streak)",
+            icon:"flame.fill",
+            color:.red
+        )
+
+    }
+    .padding(.horizontal,18)
+
+}
+
+
+
     private var errorView: some View {
         VStack(spacing: 16) {
             Image(systemName: "wifi.exclamationmark")
