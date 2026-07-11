@@ -234,7 +234,6 @@ private func hudCard(
 }
 
 
-
     private var errorView: some View {
         VStack(spacing: 16) {
             Image(systemName: "wifi.exclamationmark")
@@ -359,27 +358,106 @@ private func hudCard(
     }
 
     }
-    private func answerButton(_ answer: String, correctAnswer: String) -> some View {
-        Button(action: { handleAnswerTap(answer) }) {
-            Text(answer)
-                .font(.subheadline.weight(.semibold))
-                .foregroundColor(textColor(for: answer, correctAnswer: correctAnswer))
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 14)
-                .background(
-                    RoundedRectangle(cornerRadius: 14)
-                        .fill(backgroundColor(for: answer, correctAnswer: correctAnswer))
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 14)
-                                .stroke(borderColor(for: answer, correctAnswer: correctAnswer), lineWidth: 1.5)
-                        )
+    private func answerButton(
+    _ answer:String,
+    correctAnswer:String
+)->some View {
+
+
+    Button {
+
+        handleAnswerTap(answer)
+
+    } label: {
+
+        HStack {
+
+
+            Circle()
+                .fill(
+                    answerCircleColor(
+                        answer,
+                        correctAnswer
+                    )
                 )
+                .frame(width:30,height:30)
+                .overlay{
+
+                    Text(
+                        answerLetter(answer)
+                    )
+                    .font(.caption.bold())
+                    .foregroundColor(.white)
+
+                }
+
+
+            Text(answer)
+                .font(.body.weight(.semibold))
+                .foregroundColor(
+                    textColor(
+                        for:answer,
+                        correctAnswer:correctAnswer
+                    )
+                )
+
+
+            Spacer()
+
+
+            if vm.answerState != .none {
+
+                Image(
+                    systemName:
+                        answer == correctAnswer
+                        ? "checkmark.circle.fill"
+                        :"xmark.circle.fill"
+                )
+                .foregroundColor(
+                    answer == correctAnswer
+                    ? .green
+                    :.red
+                )
+
+            }
+
+
         }
-        .buttonStyle(.plain)
-        .disabled(vm.answerState != .none)
-        .animation(.easeInOut(duration: 0.2), value: vm.answerState)
+        .padding(16)
+        .background(
+
+            RoundedRectangle(cornerRadius:20)
+                .fill(
+                    backgroundColor(
+                        for:answer,
+                        correctAnswer:correctAnswer
+                    )
+                )
+
+        )
+        .overlay(
+
+            RoundedRectangle(cornerRadius:20)
+                .stroke(
+                    borderColor(
+                        for:answer,
+                        correctAnswer:correctAnswer
+                    ),
+                    lineWidth:1.5
+                )
+
+        )
+
     }
+    .buttonStyle(.plain)
+    .scaleEffect(
+        vm.selectedAnswer == answer ? 1.03 : 1
+    )
+    .animation(
+        .spring(),
+        value:vm.selectedAnswer
+    )
+}
 
 
     private func backgroundColor(for answer: String, correctAnswer: String) -> Color {
