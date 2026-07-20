@@ -28,16 +28,6 @@ struct GameModeCard<Destination: View>: View {
                         .font(.title3.bold())
                         .foregroundColor(.white)
 
-                    Text(mode.tagline)
-                        .font(.subheadline)
-                        .foregroundColor(.white.opacity(0.65))
-                        .lineLimit(2)
-                        .fixedSize(horizontal: false, vertical: true)
-
-                    if highScore > 0 {
-                        ScoreBadge(icon: "trophy.fill", text: "Best: \(highScore)", tint: .yellow)
-                            .padding(.top, 2)
-                    }
                 }
 
                 Spacer(minLength: 8)
