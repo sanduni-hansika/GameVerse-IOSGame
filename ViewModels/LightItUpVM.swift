@@ -141,27 +141,64 @@ final class LightItUpVM: ObservableObject {
         }
     }
 
-    private func tick() {
-        guard roundState == .playing else { return }
+     private func tick() {
 
-        let missedCount = cards.filter { $0.isLit }.count
-        for _ in 0..<missedCount {
-            applyPenalty()
+        guard roundState == .playing else {
+            return
         }
+
 
         for i in cards.indices {
-            cards[i].isLit = false
+
+
+            if cards[i].isLit {
+
+
+                applyPenalty()
+
+
+                cards[i].isLit = false
+
+                cards[i].isWilting = true
+
+
+
+                DispatchQueue.main.asyncAfter(
+                    deadline: .now() + 0.18
+                ) {
+
+                    if i < self.cards.count {
+
+                        self.cards[i].isWilting = false
+                    }
+                }
+            }
         }
 
-        let count = min(level.simultaneousLit, cards.count)
-        let indicesToLight = Array(cards.indices.shuffled().prefix(count))
 
-        withAnimation(.easeInOut(duration: 0.2)) {
+
+        let count = min(
+            level.simultaneousLit,
+            cards.count
+        )
+
+
+        let indicesToLight =
+        Array(cards.indices.shuffled().prefix(count))
+
+
+
+        withAnimation(
+            .easeInOut(duration:0.2)
+        ) {
+
             for i in indicesToLight {
+
                 cards[i].isLit = true
             }
         }
     }
+
 
     func handleTap(_ card: Card) {
 
