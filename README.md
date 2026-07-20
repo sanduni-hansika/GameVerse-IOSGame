@@ -74,8 +74,7 @@ Answer multiple-choice trivia questions, build streaks, and earn bonus points.
 
 ## 🎥 Demo
 
-🎬 **Watch 4-Minute Demo**
+🎬 **[Watch the 4-Minute Demo](https://drive.google.com/file/d/1ZH5Uv7Eyvp5aqUHr_Yod4W3-rqljFKlF/view?usp=drive_link)**
 
-*( https://drive.google.com/file/d/1ZH5Uv7Eyvp5aqUHr_Yod4W3-rqljFKlF/view?usp=drive_link )*
 
 
