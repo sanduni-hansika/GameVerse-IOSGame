@@ -26,9 +26,9 @@ enum GameLevel: Int, CaseIterable {
 
     var litWindow: Double {
         switch self {
-        case .l1: return 1.5
+        case .l1: return 1.3
         case .l2: return 1.2
-        case .l3: return 1.0
+        case .l3: return 0.9
         case .l4: return 0.8
         }
     }
