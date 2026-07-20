@@ -52,66 +52,20 @@ struct LightItUpView: View {
                     statusMessage: vm.statusMessage,
                     scores: vm.scores,
                     highlightedID: vm.lastEntryID,
-                    onHome: {
-                        dismiss()
-                    },
-                    onPlayAgain: {
-                        vm.startGame()
-                    }
+                    onHome: { dismiss() },
+                    onPlayAgain: { vm.startGame() }
                 )
             }
 
-
             if vm.showLevelUpFlash {
-
                 levelUpFlash
             }
 
-            if vm.showScorePopup {
-
-                Text(vm.scorePopupText)
-                    .font(
-                        .system(
-                            size: 42,
-                            weight: .heavy,
-                            design: .rounded
-                        )
-                    )
-                    .foregroundColor(.green)
-                    .shadow(
-                        color: .green,
-                        radius: 12
-                    )
-                    .transition(
-                        .scale.combined(
-                            with: .opacity
-                        )
-                    )
-                    .offset(y: -80)
-            }
-
-
-
             backButton
         }
-
-        .animation(
-            .spring(
-                response:0.25,
-                dampingFraction:0.7
-            ),
-            value: vm.showScorePopup
-        )
-
         .navigationBarHidden(true)
-
-        .onAppear {
-            vm.loadLeaderboard()
-        }
-
-        .onDisappear {
-            vm.stopTimers()
-        }
+        .onAppear { vm.loadLeaderboard() }
+        .onDisappear { vm.stopTimers() }
     }
 
     private var backgroundGradient: some View {
@@ -127,31 +81,18 @@ struct LightItUpView: View {
         .ignoresSafeArea()
     }
 
-
-
-
     private var backButton: some View {
 
         VStack {
 
             HStack {
 
-                Button {
-
-                    dismiss()
-
-                } label: {
-
-                    Image(systemName:"chevron.left")
+                Button(action: { dismiss() }) {
+                    Image(systemName: "chevron.left")
                         .font(.headline.bold())
                         .foregroundColor(.white)
                         .padding(10)
-                        .background(
-                            Circle()
-                                .fill(
-                                    Color.white.opacity(0.12)
-                                )
-                        )
+                        .background(Circle().fill(Color.white.opacity(0.12)))
                 }
 
                 .padding(.leading,16)
