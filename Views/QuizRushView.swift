@@ -163,36 +163,36 @@ struct QuizRushView: View {
 
 
     private var hud: some View {
-
-        HStack(spacing:12){
-
-            hudCard(
-               title:"SCORE",
-               value:"\(vm.score)",
-               icon:"star.fill",
-               color:.yellow
-            )
-
-
-        hudCard(
-            title:"QUESTION",
-            value:"\(vm.currentIndex + 1)/\(vm.questions.count)",
-            icon:"questionmark.circle.fill",
-            color:.orange
-        )
-
-
-        hudCard(
-            title:"STREAK",
-            value:"🔥 \(vm.streak)",
-            icon:"flame.fill",
-            color:.red
-        )
-
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text("SCORE")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.45))
+                Text("\(vm.score)")
+                    .font(.system(size: 26, weight: .heavy, design: .rounded))
+                    .foregroundColor(.white)
+            }
+            Spacer()
+            VStack(spacing: 2) {
+                Text("QUESTION")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.45))
+                Text("\(min(vm.currentIndex + 1, vm.questions.count)) of \(vm.questions.count)")
+                    .font(.subheadline.bold())
+                    .foregroundColor(.white)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("STREAK")
+                    .font(.caption.bold())
+                    .foregroundColor(.white.opacity(0.45))
+                Text("🔥 \(vm.streak)")
+                    .font(.subheadline.bold())
+                    .foregroundColor(.white)
+            }
+        }
+        .padding(.horizontal, 24)
     }
-    .padding(.horizontal,18)
-
-}
 
     private func hudCard(
         title:String,
@@ -359,19 +359,19 @@ struct QuizRushView: View {
     }
     
     
-    private func answerButton(
-    _ answer:String,
-    correctAnswer:String
-)->some View {
+private func answerButton(
+      _ answer:String,
+      correctAnswer:String
+      )->some View {
 
 
-    Button {
+        Button {
 
-        handleAnswerTap(answer)
+            handleAnswerTap(answer)
 
-    } label: {
+          } label: {
 
-        HStack {
+          HStack {
 
 
             Circle()
@@ -410,20 +410,20 @@ struct QuizRushView: View {
 
                 if answer == correctAnswer {
 
-        Image(systemName: "checkmark.circle.fill")
+             Image(systemName: "checkmark.circle.fill")
             .foregroundColor(.green)
 
-    } 
+             }   
             else if answer == vm.selectedAnswer {
 
-        Image(systemName: "xmark.circle.fill")
+             Image(systemName: "xmark.circle.fill")
             .foregroundColor(.red)
-                )
+        }   
 
-            }
+    }
 
 
-        }
+}
         .padding(16)
         .background(
 
@@ -449,15 +449,16 @@ struct QuizRushView: View {
 
         )
 
-    }
-    .buttonStyle(.plain)
-    .scaleEffect(
+        }
+        .buttonStyle(.plain)
+        .scaleEffect(
         vm.selectedAnswer == answer ? 1.03 : 1
-    )
-    .animation(
+        )
+        .animation(
         .spring(),
         value:vm.selectedAnswer
-    )
+       )
+    
 }
 
 private func answerLetter(_ answer:String)->String {
@@ -471,7 +472,7 @@ private func answerLetter(_ answer:String)->String {
     return String(
         Character(
             UnicodeScalar(65 + index)!
-        )
+        ) 
     )
 }
 
