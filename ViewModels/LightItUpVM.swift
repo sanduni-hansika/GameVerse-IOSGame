@@ -147,21 +147,16 @@ final class LightItUpVM: ObservableObject {
             return
         }
 
-
         for i in cards.indices {
 
 
             if cards[i].isLit {
 
-
                 applyPenalty()
-
 
                 cards[i].isLit = false
 
                 cards[i].isWilting = true
-
-
 
                 DispatchQueue.main.asyncAfter(
                     deadline: .now() + 0.18
@@ -175,18 +170,13 @@ final class LightItUpVM: ObservableObject {
             }
         }
 
-
-
         let count = min(
             level.simultaneousLit,
             cards.count
         )
 
-
         let indicesToLight =
         Array(cards.indices.shuffled().prefix(count))
-
-
 
         withAnimation(
             .easeInOut(duration:0.2)
@@ -260,8 +250,11 @@ showScorePopup = true
         }
     }
 
-     private func applyPenalty() {
+    private func applyPenalty() {
+
+        if level == .l4 {
         score = max(0, score - 1)
+        }
     }
 
     private func triggerLevelUpFlash() {
