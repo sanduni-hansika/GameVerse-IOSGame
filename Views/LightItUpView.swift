@@ -249,10 +249,11 @@ struct LightItUpView: View {
                                     endPoint:.trailing
                                 )
                             )
-                    )
-            }
-        }
 
+                            .shadow(color: .blue.opacity(0.5), radius: 14, y: 6)
+                    )
+            .padding(.top, 6)
+        }
         .padding()
     }
 
@@ -263,14 +264,9 @@ struct LightItUpView: View {
 
         VStack(spacing:0) {
 
-
             hud
 
-
-
             Spacer()
-
-
 
             LazyVGrid(
 
@@ -296,9 +292,6 @@ struct LightItUpView: View {
                     LightCardView(
 
                         isLit:card.isLit,
-
-                        isWilting:
-                            card.isWilting,
 
                         glowColor:
                             vm.level.glowColor
