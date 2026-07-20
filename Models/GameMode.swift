@@ -15,14 +15,6 @@ enum GameMode: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    var tagline: String {
-        switch self {
-        case .tapFrenzy: return "Tap fast before the 10s clock runs out"
-        case .lightItUp: return "Tap the lit card before it goes dark"
-        case .quizRush: return "10 live trivia questions, build a streak"
-        }
-    }
-
     var systemImage: String {
         switch self {
         case .tapFrenzy: return "bolt.fill"
